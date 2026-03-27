@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CakeHouse | Luxury Bakery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --p-purp: #9b59b6; --d-purp: #8e44ad; --bg: #fdf5ff; }
+        * { box-sizing: border-box; transition: 0.3s; }
+        body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--bg); color: #333; }
+        
+        /* Navigation */
+        nav { background: white; padding: 15px 8%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: sticky; top:0; z-index:1000; }
+        .logo { font-size: 28px; font-weight: 800; color: var(--d-purp); }
+
+        /* Main Layout */
+        .container { display: flex; padding: 30px 8%; gap: 25px; max-width: 1400px; margin: auto; }
+        
+        /* Product Grid */
+        .menu-grid { flex: 2.5; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .card { background: white; border-radius: 25px; overflow: hidden; text-align: center; padding-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.04); border: 1px solid #f0f0f0; }
+        .card img { width: 100%; height: 230px; object-fit: cover; background: #eee; }
+        .card h3 { margin: 15px 0 5px; font-size: 1.2rem; color: #333; }
+        
+        select, .add-btn { width: 92%; padding: 12px; margin: 8px 0; border-radius: 15px; border: 1px solid #eee; outline: none; font-size: 0.9rem; }
+        .add-btn { background: var(--p-purp); color: white; border: none; cursor: pointer; font-weight: 700; }
+        .add-btn:hover { background: var(--d-purp); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(155, 89, 182, 0.3); }
+
+        /* Sidebar Basket */
+        .sidebar { flex: 1.2; background: white; padding: 30px; border-radius: 30px; height: fit-content; position: sticky; top: 110px; box-shadow: 0 20px 50px rgba(0,0,0,0.08); border-top: 8px solid var(--p-purp); }
+        .basket-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #eee; font-size: 0.95rem; }
+        .remove-btn { color: #e74c3c; cursor: pointer; font-weight: bold; border: none; background: none; font-size: 1.1rem; }
+        
+        /* Payment Section */
+        .qr-box { margin: 25px 0; padding: 20px; border: 2px dashed var(--p-purp); border-radius: 20px; text-align: center; background: #fffaff; }
+        .qr-box p { margin: 0 0 10px; font-weight: 800; color: #444; }
+        .qr-box img { width: 180px; height: 180px; border-radius: 10px; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        
+        input, textarea { width: 100%; margin: 10px 0; padding: 14px; border: 1px solid #eee; border-radius: 15px; background: #fafafa; font-size: 1rem; }
+        .order-btn { width: 100%; padding: 18px; background: #27ae60; color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 1.2rem; margin-top: 15px; }
+
+        @media (max-width: 1100px) { .container { flex-direction: column; } .sidebar { position: static; width: 100%; } }
+    </style>
+</head>
+<body>
+
+    <nav><div class="logo">CAKE<span>HOUSE</span> 🍰</div></nav>
+
+    <div class="container">
+        <div class="menu-grid" id="grid"></div>
+
+        <div class="sidebar">
+            <h3 style="margin:0;">Your Basket 🧺</h3>
+            <div id="basket-list" style="min-height: 50px;">
+                <p style="color:#999; text-align:center; padding: 20px 0;">Empty Basket</p>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; font-size:1.8rem; font-weight:800; color:#222; margin: 20px 0;">
+                <span>Total:</span><span>₹<span id="total-val">0</span></span>
+            </div>
+
+            <div class="qr-box">
+                <p>SCAN TO PAY (UPI)</p>
+                <img id="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=saritamahapatra435@oksbi&pn=CakeHouse&am=0">
+                <p style="font-size:0.75rem; color:#888; margin-top:10px;">saritamahapatra435@oksbi</p>
+            </div>
+
+            <form id="order-form">
+                <input id="name" placeholder="Full Name" required>
+                <input id="phone" placeholder="WhatsApp Number" required>
+                <textarea id="address" placeholder="Full Delivery Address" rows="2" required></textarea>
+                <input id="msg" placeholder="Message on Cake (+₹100 Custom)">
+                <button type="submit" class="order-btn">CONFIRM ORDER 🚀</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Matching your folder 'images' and filenames with double '.jpg.jpg'
+        const products = [
+            { id: 1, name: "Dutch Truffle", type: "cake", img: "images/truffle.jpg.jpg" },
+            { id: 2, name: "Rasmalai Premium", type: "cake", img: "images/rasmalai.jpg.jpg" },
+            { id: 3, name: "Butterscotch Gold", type: "cake", img: "images/Butterschotch.jpg.jpg" },
+            { id: 4, name: "Strawberry Bliss", type: "cake", img: "images/straberry.jpg.jpg" },
+            { id: 5, name: "Blueberry Glaze", type: "cake", img: "images/blueberry.jpg.jpg" },
+            { id: 6, name: "Black Forest", type: "cake", img: "images/blackforest.jpg.jpg" },
+            { id: 7, name: "Cupcake Box (6 Pcs)", type: "unit", price: 180, img: "images/cupcake.jpg.jpg" },
+            { id: 8, name: "Choco-chip Cookie", type: "unit", price: 150, img: "images/cokkies.jpg.jpg" }
+        ];
+
+        let cart = [];
+        const UPI = "saritamahapatra435@oksbi";
+
+        function render() {
+            document.getElementById('grid').innerHTML = products.map(p => `
+                <div class="card">
+                    <img src="${p.img}" onerror="this.src='https://via.placeholder.com/400x230?text=Premium+Cake'">
+                    <div style="padding:15px;">
+                        <h3>${p.name}</h3>
+                        ${p.type==='cake' ? `
+                            <select id="s${p.id}">
+                                <option value="200" data-w="Bento">Bento - ₹200</option>
+                                <option value="350" data-w="0.5kg" selected>0.5kg - ₹350</option>
+                                <option value="700" data-w="1kg">1kg - ₹700</option>
+                                <option value="1050" data-w="1.5kg">1.5kg - ₹1050</option>
+                                <option value="1400" data-w="2kg">2kg - ₹1400</option>
+                                <option value="2100" data-w="3kg">3kg - ₹2100</option>
+                            </select>` : `<p style="font-weight:800; color:var(--p-purp); font-size:1.2rem;">₹${p.price}</p>`}
+                        <button class="add-btn" onclick="add(${p.id})">ADD TO BASKET</button>
+                    </div>
+                </div>`).join('');
+        }
+
+        function add(id) {
+            const p = products.find(x => x.id === id);
+            let pr = p.price || 0, n = p.name;
+            if(p.type==='cake') {
+                const sel = document.getElementById('s'+id);
+                pr = parseInt(sel.value);
+                n += " (" + sel.options[sel.selectedIndex].getAttribute('data-w') + ")";
+            }
+            cart.push({ n, pr }); upd();
+        }
+
+        function remove(idx) { cart.splice(idx, 1); upd(); }
+
+        function upd() {
+            const list = document.getElementById('basket-list');
+            if (cart.length === 0) {
+                list.innerHTML = '<p style="color:#999; text-align:center; padding: 20px 0;">Empty Basket</p>';
+            } else {
+                list.innerHTML = cart.map((i, idx) => `
+                    <div class="basket-item">
+                        <span>${i.n}</span>
+                        <span>₹${i.pr} <button class="remove-btn" onclick="remove(${idx})">❌</button></span>
+                    </div>`).join('');
+            }
+            
+            let t = cart.reduce((s, i) => s + i.pr, 0);
+            if(document.getElementById('msg').value.trim() !== "") t += 100;
+            
+            document.getElementById('total-val').innerText = t;
+            document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=${UPI}&pn=CakeHouse&am=${t}&cu=INR`;
+        }
+
+        document.getElementById('msg').oninput = upd;
+
+        document.getElementById('order-form').onsubmit = async (e) => {
+            e.preventDefault();
+            if(cart.length === 0) return alert("Bhai, basket khali hai!");
+            const d = {
+                customer_name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                items: cart.map(i=>i.n).join(", "),
+                total_price: parseInt(document.getElementById('total-val').innerText),
+                message: document.getElementById('msg').value,
+                payment_type: "UPI"
+            };
+            try {
+                const r = await fetch('http://127.0.0.1:8000/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d) });
+                if(r.ok) { alert("🍰 Order Confirmed! Scan QR to Pay."); cart=[]; upd(); e.target.reset(); }
+            } catch(err) { alert("Backend Error! Is uvicorn running?"); }
+        };
+        render();
+    </script>
+</body>
+</html>
