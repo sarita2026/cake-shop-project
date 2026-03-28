@@ -23,8 +23,8 @@
         .card img { width: 100%; height: 230px; object-fit: cover; background: #eee; }
         .card h3 { margin: 15px 0 5px; font-size: 1.2rem; color: #333; }
         
-        select, .add-btn { width: 92%; padding: 12px; margin: 8px 0; border-radius: 15px; border: 1px solid #eee; outline: none; font-size: 0.9rem; }
-        .add-btn { background: var(--p-purp); color: white; border: none; cursor: pointer; font-weight: 700; }
+        select, .add-btn, input, textarea { width: 92%; padding: 12px; margin: 8px 0; border-radius: 15px; border: 1px solid #eee; outline: none; font-size: 0.9rem; }
+        .add-btn { background: var(--p-purp); color: white; border: none; cursor: pointer; font-weight: 700; width: 92% !important; }
         .add-btn:hover { background: var(--d-purp); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(155, 89, 182, 0.3); }
 
         /* Sidebar Basket */
@@ -37,7 +37,7 @@
         .qr-box p { margin: 0 0 10px; font-weight: 800; color: #444; }
         .qr-box img { width: 180px; height: 180px; border-radius: 10px; border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         
-        input, textarea { width: 100%; margin: 10px 0; padding: 14px; border: 1px solid #eee; border-radius: 15px; background: #fafafa; font-size: 1rem; }
+        input, textarea, select { width: 100% !important; margin: 10px 0; padding: 14px; border: 1px solid #eee; border-radius: 15px; background: #fafafa; font-size: 1rem; }
         .order-btn { width: 100%; padding: 18px; background: #27ae60; color: white; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; font-size: 1.2rem; margin-top: 15px; }
 
         @media (max-width: 1100px) { .container { flex-direction: column; } .sidebar { position: static; width: 100%; } }
@@ -67,9 +67,45 @@
             </div>
 
             <form id="order-form">
-                <input id="name" placeholder="Full Name" required>
-                <input id="phone" placeholder="WhatsApp Number" required>
-                <textarea id="address" placeholder="Full Delivery Address" rows="2" required></textarea>
+                <input id="name" type="text" placeholder="Full Name" required>
+                
+                <!-- Number Validation: Only 10 Digits Allowed -->
+                <input id="phone" type="number" placeholder="10 Digit WhatsApp Number" 
+                       oninput="if(this.value.length > 10) this.value = this.value.slice(0, 10);" required>
+                
+                <!-- Address Dropdown for Angul -->
+                <select id="address" required>
+                    <option value="">-- Select Delivery Location (Angul) --</option>
+                    <optgroup label="Main Squares (Chhaka)">
+                        <option value="Budhi Thakurani Chhaka">Budhi Thakurani Chhaka</option>
+                        <option value="Hata Chhaka">Hata Chhaka</option>
+                        <option value="Bantala Chhaka">Bantala Chhaka</option>
+                        <option value="Turanga Chhaka">Turanga Chhaka</option>
+                        <option value="Amalapada Chhaka">Amalapada Chhaka</option>
+                        <option value="College Chhaka">College Chhaka</option>
+                        <option value="Hulurisinga Chhaka">Hulurisinga Chhaka</option>
+                        <option value="Matiasahi Chhaka">Matiasahi Chhaka</option>
+                    </optgroup>
+                    <optgroup label="Main Areas (Pada)">
+                        <option value="Mishrapada">Mishrapada</option>
+                        <option value="Hemsurapada">Hemsurapada</option>
+                        <option value="Amalapada">Amalapada</option>
+                        <option value="Similipada">Similipada</option>
+                        <option value="Vikrampur">Vikrampur</option>
+                        <option value="Nalco Nagar">Nalco Nagar</option>
+                        <option value="Hulurisinga">Hulurisinga</option>
+                        <option value="Matiasahi">Matiasahi</option>
+                    </optgroup>
+                    <optgroup label="Villages & Nearby">
+                        <option value="Susuda">Susuda</option>
+                        <option value="Khalari">Khalari</option>
+                        <option value="Karadagadia">Karadagadia</option>
+                        <option value="Badakera">Badakera</option>
+                        <option value="Kumanda">Kumanda</option>
+                        <option value="Talcher">Talcher</option>
+                    </optgroup>
+                </select>
+
                 <input id="msg" placeholder="Message on Cake (+₹100 Custom)">
                 <button type="submit" class="order-btn">CONFIRM ORDER 🚀</button>
             </form>
@@ -77,7 +113,6 @@
     </div>
 
     <script>
-        // Matching your folder 'images' and filenames with double '.jpg.jpg'
         const products = [
             { id: 1, name: "Dutch Truffle", type: "cake", img: "images/truffle.jpg.jpg" },
             { id: 2, name: "Rasmalai Premium", type: "cake", img: "images/rasmalai.jpg.jpg" },
@@ -99,7 +134,7 @@
                     <div style="padding:15px;">
                         <h3>${p.name}</h3>
                         ${p.type==='cake' ? `
-                            <select id="s${p.id}">
+                            <select id="s${p.id}" style="width: 92% !important;">
                                 <option value="200" data-w="Bento">Bento - ₹200</option>
                                 <option value="350" data-w="0.5kg" selected>0.5kg - ₹350</option>
                                 <option value="700" data-w="1kg">1kg - ₹700</option>
@@ -148,22 +183,38 @@
 
         document.getElementById('order-form').onsubmit = async (e) => {
             e.preventDefault();
+            const phone = document.getElementById('phone').value;
+            
             if(cart.length === 0) return alert("Bhai, basket khali hai!");
+            if(phone.length !== 10) return alert("Please enter a valid 10-digit number!");
+
             const d = {
                 customer_name: document.getElementById('name').value,
-                phone: document.getElementById('phone').value,
+                phone: phone,
                 address: document.getElementById('address').value,
                 items: cart.map(i=>i.n).join(", "),
                 total_price: parseInt(document.getElementById('total-val').innerText),
                 message: document.getElementById('msg').value,
                 payment_type: "UPI"
             };
+
+            // NOTE: Change this URL when you deploy your backend to Render!
             try {
-                const r = await fetch('http://127.0.0.1:8000/api/orders', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(d) });
-                if(r.ok) { alert("🍰 Order Confirmed! Scan QR to Pay."); cart=[]; upd(); e.target.reset(); }
-            } catch(err) { alert("Backend Error! Is uvicorn running?"); }
+                const r = await fetch('http://127.0.0.1:8000/api/orders', { 
+                    method:'POST', 
+                    headers:{'Content-Type':'application/json'}, 
+                    body:JSON.stringify(d) 
+                });
+                if(r.ok) { 
+                    alert("🍰 Order Confirmed! Scan QR to Pay."); 
+                    cart=[]; upd(); e.target.reset(); 
+                }
+            } catch(err) { 
+                alert("Backend not connected! Wait for Render deployment."); 
+            }
         };
         render();
     </script>
 </body>
 </html>
+
